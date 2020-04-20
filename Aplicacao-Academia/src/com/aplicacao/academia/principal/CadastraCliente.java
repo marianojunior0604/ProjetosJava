@@ -5,11 +5,9 @@
  */
 package com.aplicacao.academia.principal;
 
-import com.aplicacao.academia.DAL.ModuloConexao;
+import com.aplicacao.academia.apps.FuncoesCliente;
 import com.aplicacao.academia.classes.FormataData;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import com.aplicacao.academia.models.Cliente;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -21,10 +19,10 @@ import javax.swing.text.MaskFormatter;
  */
 public class CadastraCliente extends javax.swing.JInternalFrame {
     
-    Connection conexao = null;
-    PreparedStatement pst = null;
-    ResultSet rs = null;
     MaskFormatter msData, msFone;
+    FuncoesCliente fc = new FuncoesCliente();
+    Cliente cliente = new Cliente();
+    FormataData fd = new FormataData();
 
     /**
      * Creates new form CadastraCliente
@@ -37,49 +35,9 @@ public class CadastraCliente extends javax.swing.JInternalFrame {
             Logger.getLogger(CadastraCliente.class.getName()).log(Level.SEVERE, null, e);
         }
         initComponents();
-        conexao = ModuloConexao.conector();
-        if (conexao == null) {
-            JOptionPane.showMessageDialog(null, "Erro ao acessar o banco de dados");
-        }
         btnExclui.setEnabled(false);
     }
     
-    private void SalvarCliente(){
-        String sql = "INSERT INTO `cliente` (`nomecliente`, `fonecliente`, `nivercliente`, `endecliente`) VALUES (?, ?, ?, ?)";
-        FormataData fd = new FormataData();
-        String dataFormatada = fd.FormataData(txtDaNa.getText());
-        
-        try {
-            pst = conexao.prepareStatement(sql);
-            pst.setString(1, txtNome.getText());
-            pst.setString(2, txtFone.getText());
-            pst.setString(3, dataFormatada);
-            pst.setString(4, txtEnde.getText());
-            
-            boolean salvou = pst.execute();
-            
-            if (salvou == false) {
-                JOptionPane.showMessageDialog(null, "Dados gravados com sucesso");
-                txtNome.setText("");
-                txtFone.setText("");
-                txtDaNa.setText("");
-                txtEnde.setText("");
-            } else {
-                JOptionPane.showMessageDialog(null, "Erro ao gravar as informações no banco de dados");
-            }
-            
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e);
-        }
-        
-    }
-    
-    /*private void TestaData(String data){
-        FormataData fd = new FormataData();
-        String df = fd.FormataData(data);
-        JOptionPane.showMessageDialog(null, "Data original: " + data + "\bData formatada" + df);
-    }*/
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -129,6 +87,11 @@ public class CadastraCliente extends javax.swing.JInternalFrame {
 
         btnExclui.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         btnExclui.setText("Excluir");
+        btnExclui.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcluiActionPerformed(evt);
+            }
+        });
 
         btnSalva.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         btnSalva.setText("Salvar");
@@ -140,6 +103,11 @@ public class CadastraCliente extends javax.swing.JInternalFrame {
 
         btnPesqu.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         btnPesqu.setText("Pesquisar");
+        btnPesqu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPesquActionPerformed(evt);
+            }
+        });
 
         txtNome.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
 
@@ -227,8 +195,70 @@ public class CadastraCliente extends javax.swing.JInternalFrame {
 
     private void btnSalvaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvaActionPerformed
         // TODO add your handling code here:
-        SalvarCliente();
+        String verifica = btnSalva.getText();
+        String dataForm = fd.FormataData(txtDaNa.getText());
+        
+        if (verifica == "Salvar") {
+            cliente.setNomeCliente(txtNome.getText());
+            cliente.setFoneCliente(txtFone.getText());
+            cliente.setEndecliente(txtEnde.getText());
+            cliente.setNiveCliente(dataForm);
+            boolean cadastrou = fc.CadastraCliente(cliente);
+            if (cadastrou == true) {
+                txtNome.setText("");
+                txtFone.setText("");
+                txtDaNa.setText("");
+                txtEnde.setText("");
+            }
+        } else {
+            cliente.setNomeCliente(txtNome.getText());
+            cliente.setFoneCliente(txtFone.getText());
+            cliente.setEndecliente(txtEnde.getText());
+            cliente.setNiveCliente(dataForm);
+            boolean atualizou = fc.AtualizaCliente(cliente);
+            if (atualizou == true) {
+                txtNome.setText("");
+                txtFone.setText("");
+                txtDaNa.setText("");
+                txtEnde.setText("");
+                btnSalva.setText("Salvar");
+                btnExclui.setEnabled(false);
+            }
+        }
     }//GEN-LAST:event_btnSalvaActionPerformed
+
+    private void btnPesquActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquActionPerformed
+        // TODO add your handling code here:
+        cliente = fc.PesquisaCliente(txtNome.getText());
+        String data = fd.DataBr(cliente.getNiveCliente());
+        //System.out.println(data);
+        if (cliente == null) {
+            JOptionPane.showMessageDialog(null, "Cliente não encontrado", "Alerta", 1);
+        } else {
+            txtFone.setText(cliente.getFoneCliente());
+            txtEnde.setText(cliente.getEndecliente());
+            txtDaNa.setText(data);
+            btnExclui.setEnabled(true);
+            btnSalva.setText("Atualizar");
+        }
+    }//GEN-LAST:event_btnPesquActionPerformed
+
+    private void btnExcluiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluiActionPerformed
+        // TODO add your handling code here:
+        cliente = fc.PesquisaCliente(txtNome.getText());
+        int exclui = JOptionPane.showConfirmDialog(null, "", "", JOptionPane.YES_NO_OPTION);
+        if (exclui == JOptionPane.YES_OPTION) {
+            boolean excluido = fc.ExcluiCliente(cliente.getIdCliente());
+            if (excluido == true) {
+                txtNome.setText("");
+                txtFone.setText("");
+                txtDaNa.setText("");
+                txtEnde.setText("");
+                btnSalva.setText("Salvar");
+                btnExclui.setEnabled(false);
+            }
+        }
+    }//GEN-LAST:event_btnExcluiActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

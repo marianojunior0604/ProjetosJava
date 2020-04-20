@@ -26,9 +26,9 @@ public class FormataData {
     public String DataBr(String dataFormatada){
         String data;
         String ano = dataFormatada.substring(0, 4);
-        String mes = dataFormatada.substring(5, 6);
-        String dia = dataFormatada.substring(7);
-        data = dia  + "/" + mes + "/" + ano;
+        String mes = dataFormatada.substring(5, 7);
+        String dia = dataFormatada.substring(8);
+        data = dia + mes + ano;
         return data;
     }
     

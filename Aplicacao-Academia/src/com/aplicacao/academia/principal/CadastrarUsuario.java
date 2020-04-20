@@ -25,7 +25,6 @@ public class CadastrarUsuario extends javax.swing.JInternalFrame {
      */
     public CadastrarUsuario() {
         initComponents();
-
         btnExcluir.setEnabled(false);
     }
 

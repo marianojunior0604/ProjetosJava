@@ -83,7 +83,6 @@ public class FuncoesUsuario {
                 usuario.setLoginUsuario(loginusuario);
                 usuario.setSenhaUsuario(senhausuario);
                 usuario.setTipoUsuario(tipousuario);
-                //System.out.println(usuario.getIdUsuario() + " " + usuario.getNomeUsuario() + " " + usuario.getLoginUsuario() + " " + usuario.getSenhaUsuario() + " " + usuario.getTipoUsuario());
                 return usuario;
             } else {
                 JOptionPane.showMessageDialog(null, "Usuario não encontrado", "Atenção", 1);
